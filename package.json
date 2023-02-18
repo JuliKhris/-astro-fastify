@@ -1,29 +1,32 @@
 {
-  "name": "@julikhris/astro-fastify",
-  "version": "0.0.29",
-  "repository": {"url": "https://github.com/JuliKhris/-astro-fastify"},
-  "author": "Donald Osgood",
-  "license": "ISC",
-   "type": "module",
-  "description": "ssr fastify",
-  "exports": {
-    "./server.js": "./dist/server.js",
-    ".": "./dist/index.js",
-    "./package.json": "./package.json"
-  },
-   "types": "./dist/index.d.ts",
-  "scripts": {   
-    "build-tsc": "tsc",  
-    "release": "npm run build-tsc"
-  },
-  "dependencies":{   
-    "@fastify/static": "^6.5.0", "fastify": "^4.5.3",
-   "rollup-plugin-copy": "^3.4.0",
-    "@astrojs/webapi": "^1.0.0", 
-    "astro": "2.0.6",    
-    "@vitejs/plugin-react": "^2.1.0",
-    "typescript": "^4.6.3",
-    "@types/node": "^18.7.16"
-  }
- 
+ "name": "@julikhris/astro-fastify",
+ "version": "0.0.31",
+ "repository": {
+  "url": "https://github.com/JuliKhris/-astro-fastify"
+ },
+ "author": "Donald Osgood",
+ "license": "ISC",
+ "type": "module",
+ "description": "ssr fastify",
+ "exports": {
+  "./server.js": "./dist/server.js",
+  ".": "./dist/index.js",
+  "./package.json": "./package.json"
+ },
+ "types": "./dist/index.d.ts",
+ "scripts": {
+  "build-tsc": "tsc",
+  "release": "npm run build-tsc",
+  "publish": "npm publish -access public"
+ },
+ "dependencies": {
+  "@astrojs/webapi": "^1.0.0",
+  "@fastify/static": "^6.5.0",
+  "@types/node": "^18.7.16",
+  "@vitejs/plugin-react": "^2.1.0",
+  "astro": "2.0.6",
+  "fastify": "^4.5.3",
+  "rollup-plugin-copy": "^3.4.0",
+  "typescript": "^4.6.3"
+ }
 }
