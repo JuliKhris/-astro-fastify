@@ -20,7 +20,7 @@ const initDefaultOptions = (options?: Partial<Options>): Options => {
      }]
     
     const portToUse =  process.env.PORT ?? (port ?? _port) 
-    const hostToUse =  process.env.HOST ?? (host ?? _port)
+    const hostToUse =  process.env.HOST ?? (host ?? _host)
 
     const defaults:Options = {
       clientRelative:clientRoot,

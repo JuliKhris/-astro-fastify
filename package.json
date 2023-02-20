@@ -1,9 +1,11 @@
 {
  "name": "@julikhris/astro-fastify",
- "version": "0.0.31",
+ "version": "0.0.47",
  "repository": {
+  "type": "github",
   "url": "https://github.com/JuliKhris/-astro-fastify"
  },
+ "main":"dist/index.js",
  "author": "Donald Osgood",
  "license": "ISC",
  "type": "module",
@@ -13,12 +15,17 @@
   ".": "./dist/index.js",
   "./package.json": "./package.json"
  },
- "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.ts",
  "scripts": {
+  "copy-packfiles": "npx shx cp -r package.json dist",
   "build-tsc": "tsc",
-  "release": "npm run build-tsc",
-  "publish": "npm publish -access public"
+  "release": "npm run build-tsc & npm run copy-packfiles",
+  "publish-me": "npm publish -access public"
  },
+ "files":["dist/config.js",
+ "dist/defaults.js","dist/index.js","dist/server.js",
+ "dist/utils.js","dist/types.js",
+ "dist/index.d.ts"],
  "dependencies": {
   "@astrojs/webapi": "^1.0.0",
   "@fastify/static": "^6.5.0",

@@ -21,7 +21,7 @@ typeof _fastifyPluginHooks != 'undefined' ? _fastifyPluginHooks : undefined;
 export const start = async (manifest: SSRManifest, options: Options) => {
   let defaultArgs = initDefaultOptions(options)
   const app = new NodeApp(manifest);
-  const { useLogger, port, host, staticRoutes,pluginHooksApi} = defaultArgs;
+  const { useLogger, port, host, staticRoutes} = defaultArgs;
  
   const fastify = Fastify({
     logger: useLogger
@@ -55,8 +55,8 @@ export const start = async (manifest: SSRManifest, options: Options) => {
     }
   });
   
-  const envPort = Number(process.env.PORT)
-  const hostToUse = process.env.HOST ?? "0.0.0.0" 
+  const envPort = Number(process.env.PORT ?? port)
+  const hostToUse = process.env.HOST ?? ( host ?? "127.0.0.1").toString()
    
   fastify.listen({
     host: hostToUse,
