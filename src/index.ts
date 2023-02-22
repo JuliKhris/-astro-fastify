@@ -67,15 +67,16 @@ const viteFastifySSRPlugin=(options: any)=>{
          let outCode:string = code
         if (productionRoutesApi.pathname !== null) {
           try {
-            code = `import _fastifyRoutes from "${productionRoutesApi.pathname}";\n ${outCode}`;        
-     
+            code = `import _fastifyRoutes from "${productionRoutesApi.pathname}";\n ${outCode}`;     
+            outCode = code;
           } catch (error) {
             console.log(error);
           }
         }
         if (pluginHooksApi.pathname !== null) {
           try {
-            const code = `import _fastifyPluginHooks from "${pluginHooksApi.pathname}";\n${outCode}`;         
+            const code = `import _fastifyPluginHooks from "${pluginHooksApi.pathname}";\n${outCode}`;
+            outCode = code ;        
           } catch (error) {
             console.log(error);
           }
