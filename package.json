@@ -1,9 +1,9 @@
 {
  "name": "@julikhris/astro-fastify",
- "version": "0.0.48-2",
+ "version": "0.0.48-0",
  "repository": {
   "type": "github",
-  "url": "https://github.com/JuliKhris/-astro-fastify"
+  "url": "https://github.com/JuliKhris/-astro-fastify.git"
  },
  "main": "dist/index.js",
  "author": "Donald Osgood",
