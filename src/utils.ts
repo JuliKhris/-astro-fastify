@@ -1,5 +1,5 @@
 //utils
-import { StaticRoute} from "./types.js";
+import { StaticRoute} from "./types";
 import { FastifyInstance } from "fastify";
 import fastifyStatic from "@fastify/static";
 import * as fs from "fs";

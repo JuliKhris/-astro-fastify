@@ -1,4 +1,4 @@
-import { Options, StaticRoutes} from "./types.js";
+import { Options, StaticRoutes} from "./types";
 import config from "./config.js";
 const { port, useLogger, clientRelative, host, packageName, serverFile } = config
 import { fileURLToPath } from "url";

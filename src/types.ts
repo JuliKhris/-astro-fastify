@@ -1,9 +1,10 @@
-import type { SSRManifest } from "astro/app/types";
+
+import { SSRManifest } from "astro/app/types.js";
 import { FastifyInstance } from "fastify/types/instance";
 import { FastifyPluginAsync } from "fastify/types/plugin";
 export type {FastifyServerFactory} from 'fastify'
 export type { ServerResponse, IncomingMessage } from 'http';
-export type { SSRManifest } from "astro/app/types";
+export type { SSRManifest } from "astro/app/types.js";
 export type { Plugin as VitePlugin, UserConfig } from 'vite';
 
 export interface Properties {

@@ -1,7 +1,7 @@
 import { relative } from "path";
 import copy from "rollup-plugin-copy";
 import { fileURLToPath, URL } from "url";
-import { Options } from "./types.js";
+import { Options } from "./types";
 import { AstroAdapter, AstroIntegration} from "astro";
 import config from "./config.js";
 const {  packageName,
