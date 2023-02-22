@@ -5,7 +5,7 @@
   "type": "github",
   "url": "https://github.com/JuliKhris/-astro-fastify"
  },
- "main":"dist/index.js",
+ "main": "dist/index.js",
  "author": "Donald Osgood",
  "license": "ISC",
  "type": "module",
@@ -15,17 +15,25 @@
   ".": "./dist/index.js",
   "./package.json": "./package.json"
  },
-  "types": "./dist/index.d.ts",
+ "types": "./dist/index.d.ts",
  "scripts": {
   "copy-packfiles": "npx shx cp -r package.json dist",
   "build-tsc": "tsc",
   "release": "npm run build-tsc & npm run copy-packfiles",
-  "publish-me": "npm publish -access public"
+  "publish:beta": "npm version prerelease && npm publish -access public --tag beta",
+  "publish:patch": "npm version patch && npm publish -access public --tag latest",
+  "publish:minor": "npm version minor && npm publish -access public --tag latest",
+  "publish:major": "npm version major && npm publish -access public --tag latest"
  },
- "files":["dist/config.js",
- "dist/defaults.js","dist/index.js","dist/server.js",
- "dist/utils.js","dist/types.js",
- "dist/index.d.ts"],
+ "files": [
+  "dist/config.js",
+  "dist/defaults.js",
+  "dist/index.js",
+  "dist/server.js",
+  "dist/utils.js",
+  "dist/types.js",
+  "dist/index.d.ts"
+ ],
  "dependencies": {
   "@astrojs/webapi": "^1.0.0",
   "@fastify/static": "^6.5.0",
@@ -33,7 +41,9 @@
   "@vitejs/plugin-react": "^2.1.0",
   "astro": "2.0.6",
   "fastify": "^4.5.3",
+  "fastify-plugin": "^4.5.0",
   "rollup-plugin-copy": "^3.4.0",
-  "typescript": "^4.6.3"
+  "typescript": "^4.6.3",
+  "version": "^0.1.2"
  }
 }

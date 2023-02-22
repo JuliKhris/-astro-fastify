@@ -1,5 +1,6 @@
 import type { SSRManifest } from "astro/app/types";
 import { FastifyInstance } from "fastify/types/instance";
+import { FastifyPluginAsync } from "fastify/types/plugin";
 export type {FastifyServerFactory} from 'fastify'
 export type { ServerResponse, IncomingMessage } from 'http';
 export type { SSRManifest } from "astro/app/types";
@@ -30,11 +31,14 @@ export interface Options {
     useLogger?: boolean
     staticRoutes?:StaticRoutes
     serverEntryPoint?: string
+    fastifyPlugins?:FastifyPlugins
 }
 
 export type AvailableFastifyRoutes = (fastify: FastifyInstance) => void;
 
 export type FastifyPluginHooks= (fastify: FastifyInstance) => void;
+
+export type FastifyPlugins = FastifyPluginAsync[]
 
 
 

@@ -64,17 +64,24 @@ const viteFastifySSRPlugin=(options: any)=>{
     transform(code: any, id: any) {
       if (id.includes(`${packageBase}/dist/server.js`)) {        
          const { productionRoutesApi, pluginHooksApi } = options;
-        if (productionRoutesApi !== null) {
+         let outCode:string = code
+        if (productionRoutesApi.pathname !== null) {
           try {
-            const outCode = `import _fastifyRoutes from "${productionRoutesApi.pathname}";\n
-            import _fastifyPluginHooks from "${pluginHooksApi.pathname}";\n
-            ${code}`;
-            return { code: outCode };
+            code = `import _fastifyRoutes from "${productionRoutesApi.pathname}";\n ${outCode}`;        
+     
           } catch (error) {
             console.log(error);
           }
         }
-      }
+        if (pluginHooksApi.pathname !== null) {
+          try {
+            const code = `import _fastifyPluginHooks from "${pluginHooksApi.pathname}";\n${outCode}`;         
+          } catch (error) {
+            console.log(error);
+          }
+        }
+        return outCode;
+      }      
     },
   };
 }

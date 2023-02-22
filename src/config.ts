@@ -1,6 +1,6 @@
 const config ={
     packageName: "@julikhris/astro-fastify",
-    packageBase: "ssr_fastify",
+    packageBase: "astro-fastify",
     viteRoutesPackageName: "vite-fastify",
     clientRelative: "dist/client",
     serverFile: "server.js",

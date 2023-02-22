@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 
 const initDefaultOptions = (options?: Partial<Options>): Options => {
    const {pluginHooksApi:_pluginHooksApi, staticRoutes,port:_port, 
-    host:_host, useLogger:_useLogger,clientRelative:_clientRelative} = options!
+    host:_host, useLogger:_useLogger,clientRelative:_clientRelative,fastifyPlugins:_fastifyPlugins} = options!
 
   const clientRoot = new URL(_clientRelative ?? clientRelative, import.meta.url);
   const url = fileURLToPath(new URL('./assets', clientRoot + '/'))
@@ -29,7 +29,8 @@ const initDefaultOptions = (options?: Partial<Options>): Options => {
       useLogger: _useLogger?? useLogger,
       staticRoutes:_staticRoutes,
       serverEntryPoint:`${packageName}/${serverFile}`,
-      pluginHooksApi: _pluginHooksApi ?? undefined
+      pluginHooksApi: _pluginHooksApi ?? undefined,
+      fastifyPlugins: _fastifyPlugins ?? undefined
     }      
     return {
       ...defaults,
