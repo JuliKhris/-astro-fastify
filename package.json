@@ -30,7 +30,7 @@
   "dist/index.js",
   "dist/server.js",
   "dist/utils.js",
-  "dist/types.js",
+  "dist/types.d.ts",
   "dist/index.d.ts"
  ],
  "dependencies": {
