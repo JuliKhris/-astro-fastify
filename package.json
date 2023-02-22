@@ -1,6 +1,6 @@
 {
  "name": "@julikhris/astro-fastify",
- "version": "0.0.48-8",
+ "version": "0.0.48-9",
  "main": "dist/index.js",
  "author": "Donald Osgood",
  "license": "ISC",
