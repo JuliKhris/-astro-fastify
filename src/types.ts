@@ -23,9 +23,9 @@ export interface StaticRoute{
 export type StaticRoutes = StaticRoute[]
 
 export interface Options {
-    productionRoutesApi?: string | URL | ((instance:FastifyInstance)=> any)
-    devRoutesApi?: string | URL | ((instance:FastifyInstance)=> any)     
-    pluginHooksApi?: string | URL | ((instance:FastifyInstance)=> any)
+    productionRoutesApi?: URL 
+    devRoutesApi?: (fastify:FastifyInstance)=>any
+    pluginHooksApi?: URL 
     clientRelative: string | URL 
     port?: number 
     host?:string | URL
@@ -33,11 +33,14 @@ export interface Options {
     staticRoutes?:StaticRoutes
     serverEntryPoint?: string
     fastifyPlugins?:FastifyPlugins
+    authPluginProvider?: AuthPluginProvider
 }
 
 export type AvailableFastifyRoutes = (fastify: FastifyInstance) => void;
 
 export type FastifyPluginHooks= (fastify: FastifyInstance) => void;
+
+export type AuthPluginProvider = {authPlugin:FastifyPluginAsync, validateDecorator:string }
 
 export type FastifyPlugins = FastifyPluginAsync[]
 

@@ -33,12 +33,6 @@ export const start = async (manifest: SSRManifest, options: Options) => {
 
   console.log("on start set routes")
 
-  if(fastifyPlugins){
-    fastifyPlugins.forEach(element=>{
-      fastify.register(element)
-    })
-  }
-
   staticRoutes!.forEach(element => {
     setFastifyStaticRoutes(fastify, element)
   });

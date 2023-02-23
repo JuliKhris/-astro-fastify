@@ -23,12 +23,12 @@ const getAdapter = (args?: Options): AstroAdapter =>{
   };
 }
 
-const viteFastifySSRPlugin=(options: any)=>{
+const viteFastifySSRPlugin=(options: Options)=>{
   return {
     name: viteRoutesPackageName,
     async configureServer(server: any) {
       const nextSymbol = Symbol("next");
-      const { devRoutesApi, logger } = options;
+      const { devRoutesApi, useLogger, authPluginProvider} = options;
 
       const serverFactory: FastifyServerFactory = (handler: any, opts: any):Server => {
         server.middlewares.use((req: any, res: any, next: any) => {
@@ -39,14 +39,30 @@ const viteFastifySSRPlugin=(options: any)=>{
       };
 
       const fastify = Fastify({
-        logger: logger ?? true,
+        logger: useLogger ?? true,
         serverFactory,
       });
 
+      if(authPluginProvider){
+        console.log('authPlugin found')
+        const {authPlugin, validateDecorator} = authPluginProvider
+        
+        fastify.register(authPlugin).after(()=>
+        {  
+          if(fastify.hasDecorator(validateDecorator)) 
+           
+           console.log("found decorator")
+           // @ts-ignore  
+           fastify.get('/*', fastify[validateDecorator])   
+         
+          //fastify[validateDecorator]
+        })
+      }
+    
       if (devRoutesApi) {
         if (typeof devRoutesApi != "function") {
           throw new Error(
-            `astro-fastify: ${devRoutesApi.toString()} should be a function`
+            `astro-fastify: ${devRoutesApi} should be a function`
           );
         }
         devRoutesApi(fastify);
@@ -65,17 +81,17 @@ const viteFastifySSRPlugin=(options: any)=>{
       if (id.includes(`${packageBase}/dist/server.js`)) {        
          const { productionRoutesApi, pluginHooksApi } = options;
          let outCode:string = code
-        if (productionRoutesApi.pathname !== null) {
+        if (productionRoutesApi?.pathname !== null) {
           try {
-            code = `import _fastifyRoutes from "${productionRoutesApi.pathname}";\n ${outCode}`;     
+            code = `import _fastifyRoutes from "${productionRoutesApi?.pathname}";\n ${outCode}`;     
             outCode = code;
           } catch (error) {
             console.log(error);
           }
         }
-        if (pluginHooksApi.pathname !== null) {
+        if (pluginHooksApi?.pathname !== null) {
           try {
-            const code = `import _fastifyPluginHooks from "${pluginHooksApi.pathname}";\n${outCode}`;
+            const code = `import _fastifyPluginHooks from "${pluginHooksApi?.pathname}";\n${outCode}`;
             outCode = code ;        
           } catch (error) {
             console.log(error);
