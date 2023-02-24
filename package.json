@@ -1,6 +1,6 @@
 {
  "name": "@julikhris/astro-fastify",
- "version": "0.0.57-1",
+ "version": "0.0.57",
  "main": "dist/index.js",
  "author": "Donald Osgood",
  "license": "ISC",
@@ -10,7 +10,7 @@
  },
  "description": "ssr fastify",
  "exports": {
-    "./server.js": "./dist/server.js",
+  "./server.js": "./dist/server.js",
   ".": "./dist/index.js",
   "./package.json": "./package.json"
  },
