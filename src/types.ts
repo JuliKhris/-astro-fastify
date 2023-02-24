@@ -40,7 +40,7 @@ export type AvailableFastifyRoutes = (fastify: FastifyInstance) => void;
 
 export type FastifyPluginHooks= (fastify: FastifyInstance) => void;
 
-export type AuthPluginProvider = {authPlugin:FastifyPluginAsync, validateDecorator:string }
+export type AuthPluginProvider = {authPlugin:FastifyPluginAsync, validateDecorator:string, options:{} }
 
 export type FastifyPlugins = FastifyPluginAsync[]
 
