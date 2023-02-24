@@ -10,6 +10,7 @@
  },
  "description": "ssr fastify",
  "exports": {
+    "./server.js": "./dist/server.js",
   ".": "./dist/index.js",
   "./package.json": "./package.json"
  },
