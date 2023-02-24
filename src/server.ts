@@ -21,7 +21,7 @@ typeof _fastifyPluginHooks != 'undefined' ? _fastifyPluginHooks : undefined;
 export const start = async (manifest: SSRManifest, options: Options) => {
   let defaultArgs = initDefaultOptions(options)
   const app = new NodeApp(manifest);
-  const { useLogger, port, host, staticRoutes, fastifyPlugins} = defaultArgs;
+  const { useLogger, port, host, staticRoutes, fastifyPlugins, authPluginProvider} = defaultArgs;
  
   const fastify = Fastify({
     logger: useLogger
@@ -45,6 +45,18 @@ export const start = async (manifest: SSRManifest, options: Options) => {
 		fastifyPluginHooks(fastify)
 	}
   
+  if (authPluginProvider) {
+    console.log('authPlugin found');
+    const { authPlugin, validateDecorator } = authPluginProvider;
+    fastify.register(authPlugin).after(() => {
+        if (fastify.hasDecorator(validateDecorator))
+            console.log("found decorator");
+        // @ts-ignore  
+        fastify.get('/*', fastify[validateDecorator]);
+        //fastify[validateDecorator]
+    });
+}
+
   fastify.get('/*', async function (request, reply) {
     console.log("request made to fastify")   
     const routeData = app.match(request.raw, { matchNotFound: true });
