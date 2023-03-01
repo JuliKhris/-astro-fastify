@@ -5,10 +5,10 @@ import { fileURLToPath } from "url";
 
 const initDefaultOptions = (options?: Partial<Options>): Options => {
    const {pluginHooksApi:_pluginHooksApi, staticRoutes,port:_port, 
-    host:_host, useLogger:_useLogger,clientRelative:_clientRelative,fastifyPlugins:_fastifyPlugins} = options!
+    host:_host, useLogger:_useLogger,clientRelative:_clientRelative,fastifyPlugins:_fastifyPlugins, authPluginProvider:_authPluginProvider} = options!
 
   const clientRoot = new URL(_clientRelative ?? clientRelative, import.meta.url);
-  const url = fileURLToPath(new URL('./assets', clientRoot + '/'))
+  //const url = fileURLToPath(new URL('./assets', clientRoot + '/'))
  
   const _staticRoutes:StaticRoutes = staticRoutes ?? [ { 
     clientRelative:_clientRelative?.toString() ?? clientRelative,
@@ -30,7 +30,8 @@ const initDefaultOptions = (options?: Partial<Options>): Options => {
       staticRoutes:_staticRoutes,
       serverEntryPoint:`${packageName}/${serverFile}`,
       pluginHooksApi: _pluginHooksApi ?? undefined,
-      fastifyPlugins: _fastifyPlugins ?? undefined
+      fastifyPlugins: _fastifyPlugins ?? undefined,
+      authPluginProvider: _authPluginProvider ?? undefined
     }      
     return {
       ...defaults,

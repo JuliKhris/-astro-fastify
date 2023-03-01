@@ -17,9 +17,19 @@ Special thanks to @matthewp/astro-fastify; this is an extension of that adapter 
 
 - [@DinoDon](https://github.com/tifsolus)
 
+## Version0.0.59
+1 ) Added ability to pass auth plugin as a parameter. New parameter authPluginProvider?: AuthPluginProvider | AuthPluginProviderFromConfig; Pass a authplugin config file.       
+       Example file content of file that can be passed as value
+       import { pathToFileURL, URL } from "url";
+      const authPluginConfig = {
+      "pluginName": "@julikhris/fastify-msal",
+      "objectName": "fastifyAuthMsal",
+      "pluginPath": pathToFileURL("Path to a plugin"),
+      "authActions":pathToFileURL("Path to a file containing actions, must have a function named validate to handle authentication validation, This will be passed to plugin option defined by  "),
+      "decorator": "name of plugin decorator to call",
+      "functionName": "name of plugin option that the validate function from authActions will be passed to"
 
-
-
+See usage below         
 
 ## Installation
 
@@ -27,12 +37,12 @@ Install @julikhris/astro-fastify
 
 npm install @julikhris/astro-fastify
     
-## Usage/
+## Usage
 
 ```typescript
 //Import the adapter 
 // Git Repo Comin Soon!
-import adapter from "@julikhris/astro-fastify";
+//import adapter from "@julikhris/astro-fastify";
 
 //create a arrow function to build adapter values
 // Parameters to pass:
@@ -58,34 +68,35 @@ import adapter from "@julikhris/astro-fastify";
 // port to listen on Azure windows will default to path as it used named pipes
 // plugin hooks that attaches to Fastify onrequest hook: for example inject auth hander
 
-const useFastifyAdapter = (
-  clientRelative,
-  staticRoutes,
-  devRoutesApi,
-  productionRoutesApi,
-  port,
-  pluginHooksApi
-) => {
-  return adapter({
-    clientRelative,
-    staticRoutes,
-    devRoutesApi,
-    productionRoutesApi,
-    port,
-    pluginHooksApi,
-  });
-};
+// Example
+// const useFastifyAdapter = (
+//   clientRelative: string,
+//   staticRoutes: ({ clientRelative: any; root: string; prefix: string; setHeaders(res: any): void; decorateReply: boolean; } | { clientRelative: any; root: string; prefix: string; setHeaders(res: any): void; decorateReply?: undefined; })[],
+//   devRoutesApi: any,
+//   productionRoutesApi: URL,
+//   port: number,
+//   pluginHooksApi: URL
+// ) => {
+//   return adapter({
+//     clientRelative,
+//     staticRoutes,
+//     devRoutesApi,
+//     productionRoutesApi,
+//     port,
+//     pluginHooksApi,
+//     authPluginProvider:{config:pathToFileURL(resolvedAuthConfigPlugin)}
+//   })
+// };
 
-// add adapter to astro.config
- adapter: useFastifyAdapter(
-    clientRelative,
-    getStaticRoutes(clientRelative),
-    await getServerRoutes(),
-    pathToFileURL(resolvedServerRoutesPath),
-    serverPort,
-    pathToFileURL(resolvedServerHooksPath)
-  ),
-```
+// // add adapter to astro.config
+//  adapter: useFastifyAdapter(
+//     clientRelative,
+//     getStaticRoutes(clientRelative),
+//     await getServerRoutes(),
+//     pathToFileURL(resolvedServerRoutesPath),
+//     serverPort,
+//     pathToFileURL(resolvedServerHooksPath)
+//   ),
 
 
 

@@ -2,6 +2,7 @@
 import { SSRManifest } from "astro/app/types.js";
 import { FastifyInstance } from "fastify/types/instance";
 import { FastifyPluginAsync } from "fastify/types/plugin";
+import { Url } from "url";
 export type {FastifyServerFactory} from 'fastify'
 export type { ServerResponse, IncomingMessage } from 'http';
 export type { SSRManifest } from "astro/app/types.js";
@@ -33,7 +34,7 @@ export interface Options {
     staticRoutes?:StaticRoutes
     serverEntryPoint?: string
     fastifyPlugins?:FastifyPlugins
-    authPluginProvider?: AuthPluginProvider
+    authPluginProvider?: AuthPluginProvider | AuthPluginProviderFromConfig 
 }
 
 export type AvailableFastifyRoutes = (fastify: FastifyInstance) => void;
@@ -42,7 +43,11 @@ export type FastifyPluginHooks= (fastify: FastifyInstance) => void;
 
 export type AuthPluginProvider = {authPlugin:FastifyPluginAsync, validateDecorator:string, options:{} }
 
+export type AuthPluginProviderFromConfig = {config:Url}
+
 export type FastifyPlugins = FastifyPluginAsync[]
+
+
 
 
 

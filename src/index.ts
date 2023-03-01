@@ -1,19 +1,16 @@
 import { relative } from "path";
 import copy from "rollup-plugin-copy";
 import { fileURLToPath, URL } from "url";
-import { Options } from "./types";
-import { AstroAdapter, AstroIntegration} from "astro";
+import { AuthPluginProviderFromConfig, Options } from "./types";
+import { AstroAdapter, AstroIntegration } from "astro";
 import config from "./config.js";
-const {  packageName,
-  serverFile,
-  viteRoutesPackageName,
-  packageBase, } = config
+const { packageName, serverFile, viteRoutesPackageName, packageBase } = config;
 
 import initDefaultOptions from "./defaults.js";
 import Fastify, { FastifyServerFactory } from "fastify";
 import { Server } from "http";
 
-const getAdapter = (args?: Options): AstroAdapter =>{
+const getAdapter = (args?: Options): AstroAdapter => {
   const serverEntryPoint = `${packageName}/${serverFile}`;
   return {
     name: packageName,
@@ -21,16 +18,19 @@ const getAdapter = (args?: Options): AstroAdapter =>{
     exports: ["createExports"],
     args: args,
   };
-}
+};
 
-const viteFastifySSRPlugin=(options: Options)=>{
+const viteFastifySSRPlugin = (options: Options) => {
   return {
     name: viteRoutesPackageName,
     async configureServer(server: any) {
       const nextSymbol = Symbol("next");
-      const { devRoutesApi, useLogger, authPluginProvider} = options;
+      const { devRoutesApi, useLogger } = options;
 
-      const serverFactory: FastifyServerFactory = (handler: any, opts: any):Server => {
+      const serverFactory: FastifyServerFactory = (
+        handler: any,
+        opts: any
+      ): Server => {
         server.middlewares.use((req: any, res: any, next: any) => {
           req[nextSymbol] = next;
           handler(req, res);
@@ -43,22 +43,6 @@ const viteFastifySSRPlugin=(options: Options)=>{
         serverFactory,
       });
 
-      if(authPluginProvider){
-        console.log('authPlugin found')
-        const {authPlugin, validateDecorator} = authPluginProvider
-        
-        fastify.register(authPlugin).after(()=>
-        {  
-          if(fastify.hasDecorator(validateDecorator)) 
-           
-           console.log("found decorator")
-           // @ts-ignore  
-           fastify.get('/*', fastify[validateDecorator])   
-         
-          //fastify[validateDecorator]
-        })
-      }
-    
       if (devRoutesApi) {
         if (typeof devRoutesApi != "function") {
           throw new Error(
@@ -77,13 +61,43 @@ const viteFastifySSRPlugin=(options: Options)=>{
 
       await fastify.ready();
     },
-    transform(code: any, id: any) {
-      if (id.includes(`${packageBase}/dist/server.js`)) {        
-         const { productionRoutesApi, pluginHooksApi } = options;
-         let outCode:string = code
+    async transform(code: any, id: any) {
+      if (id.includes(`${packageBase}/dist/server.js`)) {
+        const { productionRoutesApi, pluginHooksApi, authPluginProvider } =
+          options;
+        let outCode: string = code;
+        if (authPluginProvider) {
+          const _configPathFromFile = getProviderConfigFromFile(
+            authPluginProvider as AuthPluginProviderFromConfig
+          )
+          
+          if (_configPathFromFile) {
+            outCode = `import _authPluginConfig from "${_configPathFromFile}"; \n ${outCode}`
+            await import(_configPathFromFile).then(async item=>{
+              const _authPluginConfig = item.default
+              const {pluginPath,authActions,validateFunctionName, actionsName} = _authPluginConfig; 
+              if(pluginPath){
+                const plugIn = await import(pluginPath.pathname).then( 
+                  async (item)=> { 
+                  if(pluginPath.pathname){
+                      outCode = `import _authPlugin from "${pluginPath.pathname}";\n  ${outCode}`;
+                  }
+                  if(authActions.pathname){
+                      outCode = `import _authActions from "${authActions.pathname}";\n ${outCode}`;  
+                  }                                                                
+                })
+              }
+          }); 
+          }
+          else{
+            //try authplugin provider object
+            console.log("AuthPluginProvider type not implemented yet. Please use AuthPluginProviderFromConfig")
+          }
+        }
+
         if (productionRoutesApi?.pathname !== null) {
           try {
-            code = `import _fastifyRoutes from "${productionRoutesApi?.pathname}";\n ${outCode}`;     
+            code = `import _fastifyRoutes from "${productionRoutesApi?.pathname}";\n ${outCode}`;
             outCode = code;
           } catch (error) {
             console.log(error);
@@ -92,18 +106,28 @@ const viteFastifySSRPlugin=(options: Options)=>{
         if (pluginHooksApi?.pathname !== null) {
           try {
             const code = `import _fastifyPluginHooks from "${pluginHooksApi?.pathname}";\n${outCode}`;
-            outCode = code ;        
+            outCode = code;
           } catch (error) {
             console.log(error);
           }
         }
         return outCode;
-      }      
+      }
     },
   };
-}
+};
 
-const adapter = (args: Options): AstroIntegration=>{
+const getProviderConfigFromFile = (
+  authPluginConfig: AuthPluginProviderFromConfig
+) => {
+  try {
+    return authPluginConfig["config"].pathname;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+const adapter = (args: Options): AstroIntegration => {
   // initilize options
   let defaultArgs = initDefaultOptions(args);
   let _client: globalThis.URL;
@@ -160,6 +184,6 @@ const adapter = (args: Options): AstroIntegration=>{
       },
     },
   };
-}
+};
 
-export default adapter
+export default adapter;

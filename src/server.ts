@@ -2,13 +2,25 @@
 import { NodeApp } from 'astro/app/node';
 import Fastify from 'fastify';
 import { polyfill } from '@astrojs/webapi';
-import { AvailableFastifyRoutes, FastifyPluginHooks, IncomingMessage, Options, Properties, ServerResponse, SSRManifest, FastifyPlugins } from './types.js';
+import { AvailableFastifyRoutes, FastifyPluginHooks, IncomingMessage, Options, Properties, ServerResponse, SSRManifest } from './types.js';
 import initDefaultOptions from './defaults.js';
 import { setFastifyStaticRoutes } from './utils.js';
 
 polyfill(globalThis, {
   exclude: 'window document',
 });
+
+const authActions =
+// @ts-ignore
+typeof _authActions != 'undefined' ? _authActions : undefined;
+
+const authPlugin =
+// @ts-ignore
+typeof _authPlugin != 'undefined' ? _authPlugin : undefined;
+
+const authPluginConfig =
+// @ts-ignore
+typeof _authPluginConfig != 'undefined' ? _authPluginConfig : undefined;
 
 const fastifyRoutes: AvailableFastifyRoutes =
   // @ts-ignore
@@ -44,18 +56,29 @@ export const start = async (manifest: SSRManifest, options: Options) => {
   if(fastifyPluginHooks){
 		fastifyPluginHooks(fastify)
 	}
+
+  if(authPluginConfig){
+    if(authPlugin){
+        if(authActions){  
+            const{decorator,functionName} = authPluginConfig; 
+            const {validate} = authActions();
+           if(validate){
+            fastify.register(authPlugin,{[functionName]:validate}).after(() => {
+                  if (fastify.hasDecorator(decorator))
+                    console.log("found decorator");                     
+                    // @ts-ignore   
+                    fastify.addHook('onRequest', fastify[`${decorator}`]);     
+                 });
+           }
+            else {
+                console.log("Auth Actions must export validate function");
+            }                                       
+            
+        }
+    }
+}    
+
   
-//   if (authPluginProvider) {
-//     console.log('authPlugin found');
-//     const { authPlugin, validateDecorator, options } = authPluginProvider;
-//     fastify.register(authPlugin).after(() => {
-//         if (fastify.hasDecorator(validateDecorator))
-//             console.log("found decorator");
-//         // @ts-ignore  
-//         fastify.get('/*', fastify[validateDecorator](options));
-//         //fastify[validateDecorator]
-//     });
-// }
 
   fastify.get('/*', async function (request, reply) {
     console.log("request made to fastify")   
