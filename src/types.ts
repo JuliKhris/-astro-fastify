@@ -34,7 +34,7 @@ export interface Options {
     staticRoutes?:StaticRoutes
     serverEntryPoint?: string
     fastifyPlugins?:FastifyPlugins
-    authPluginProvider?: AuthPluginProvider | AuthPluginProviderFromConfig 
+    authPluginProvider?: AuthPluginProvider | AuthPluginProviderFromConfig     
 }
 
 export type AvailableFastifyRoutes = (fastify: FastifyInstance) => void;
@@ -46,6 +46,7 @@ export type AuthPluginProvider = {authPlugin:FastifyPluginAsync, validateDecorat
 export type AuthPluginProviderFromConfig = {config:Url}
 
 export type FastifyPlugins = FastifyPluginAsync[]
+
 
 
 
