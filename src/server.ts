@@ -15,6 +15,8 @@ import initDefaultOptions from "./defaults.js";
 import { setFastifyStaticRoutes } from "./utils.js";
 import { RouteInfo } from "astro/app/types.js";
 import { RouteData } from "astro";
+import { FastifyReply } from "fastify/types/reply.js";
+import Stream, { Readable } from 'node:stream';
 
 polyfill(globalThis, {
   exclude: "window document",
@@ -42,10 +44,11 @@ const fastifyPluginHooks: FastifyPluginHooks =
 export const start = async (manifest: SSRManifest, options: Options) => {
   let defaultArgs = initDefaultOptions(options);
   const app = new NodeApp(manifest);
-  const { useLogger, port, host, staticRoutes } = defaultArgs;
+  const { useLogger, port, host, staticRoutes, fastifyServerOptions } = defaultArgs;
 
   const fastify = Fastify({
     logger: useLogger,
+    ...fastifyServerOptions 
   });
 
   
@@ -109,9 +112,9 @@ const generateResponse = async (request: { raw: IncomingMessage | Request; },rou
   return finalResponse
 }
 
-const processResponse = async(reply: { raw: ServerResponse<IncomingMessage>; }, request: { raw: IncomingMessage | Request; },routeData: RouteData | undefined)=>{
+const processResponse = async(reply:FastifyReply, request: { raw: IncomingMessage | Request; },routeData: RouteData | undefined):Promise<FastifyReply>=>{
   const response = await generateResponse(request, routeData)  
-  await writeWebResponse(reply.raw, response);
+  return await writeWebResponse(reply, response);
 }
 
   if (authPluginConfig) {
@@ -136,7 +139,7 @@ const processResponse = async(reply: { raw: ServerResponse<IncomingMessage>; }, 
                   preHandler: fastify[`${decorator}`],
                   handler: async (request, reply) => {
                     request.log.info(`${route} generated`);
-                    await processResponse(reply,request,_routeData)                                  
+                    return await processResponse(reply,request,_routeData)                                  
                   },
                 });
               }
@@ -154,10 +157,9 @@ const processResponse = async(reply: { raw: ServerResponse<IncomingMessage>; }, 
   }
 
   fastify.get("/*", async function (request, reply) {
-    console.log("request made to fastify");
     const routeData = app.match(request.raw, { matchNotFound: true });
     if (routeData) {
-      await processResponse(reply,request,routeData)       
+      return await processResponse(reply,request,routeData)       
     } else {
       reply.status(404).type("text/plain").send("Not found");
     }
@@ -175,38 +177,43 @@ const processResponse = async(reply: { raw: ServerResponse<IncomingMessage>; }, 
     },
     function (err, address) {
       if (err) {
-        console.log("fastify error:");
-        console.log(err);
         fastify.log.error(err);
-        process.exit(1);
+        process.exit(1);        
       }
-      console.log(`Server is now listening on ${address}`);
+      process.env.SERVER_ACTIVE_ADDRESS = address
+      console.log(`Server is now listening on ${process.env.SERVER_ACTIVE_ADDRESS}`);
     }
   );
 };
 
-async function writeChunks(chunks: any, res: ServerResponse<IncomingMessage>) {
-  for await (const chunk of chunks) {
-    res.write(chunk);
+async function writeChunks(chunks: any, res: FastifyReply):Promise<FastifyReply>{
+  const s = new Readable();
+    s._read = () => {}
+    res.send(s)
+    for await (const chunk of chunks) {
+       s.push(chunk)
+    }
+    s.push(null)    
+    await res
+    return res
   }
-}
 
 async function writeWebResponse(
-  res: ServerResponse<IncomingMessage>,
+  res: FastifyReply,
   webResponse: Response
-) {
-  const { status, headers, body } = webResponse;
-  res.writeHead(status, Object.fromEntries(headers.entries()));
+):Promise<FastifyReply> {
+  const {status, headers, body } = webResponse;
+  res.code(status)
+  res.headers(Object.fromEntries(headers.entries()));    
   if (body) {
-    await writeChunks(body, res);
+  return await writeChunks(body,res)
   }
-  res.end();
+  return res
 }
 
 export function createExports({ manifest, options }: Properties) {
   return {
     start() {
-      console.log("start");
       return start(manifest, options);
     },
   };

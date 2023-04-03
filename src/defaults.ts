@@ -1,14 +1,13 @@
 import { Options, StaticRoutes} from "./types";
 import config from "./config.js";
 const { port, useLogger, clientRelative, host, packageName, serverFile } = config
-import { fileURLToPath } from "url";
 
 const initDefaultOptions = (options?: Partial<Options>): Options => {
    const {pluginHooksApi:_pluginHooksApi, staticRoutes,port:_port, 
-    host:_host, useLogger:_useLogger,clientRelative:_clientRelative,fastifyPlugins:_fastifyPlugins, authPluginProvider:_authPluginProvider} = options!
+    host:_host, useLogger:_useLogger,clientRelative:_clientRelative,fastifyPlugins:_fastifyPlugins, authPluginProvider:_authPluginProvider,
+    fastifyServerOptions:_fastifyServerOptions} = options!
 
   const clientRoot = new URL(_clientRelative ?? clientRelative, import.meta.url);
-  //const url = fileURLToPath(new URL('./assets', clientRoot + '/'))
  
   const _staticRoutes:StaticRoutes = staticRoutes ?? [ { 
     clientRelative:_clientRelative?.toString() ?? clientRelative,
@@ -31,7 +30,8 @@ const initDefaultOptions = (options?: Partial<Options>): Options => {
       serverEntryPoint:`${packageName}/${serverFile}`,
       pluginHooksApi: _pluginHooksApi ?? undefined,
       fastifyPlugins: _fastifyPlugins ?? undefined,
-      authPluginProvider: _authPluginProvider ?? undefined
+      authPluginProvider: _authPluginProvider ?? undefined,
+      fastifyServerOptions: _fastifyServerOptions ?? undefined
     }      
     return {
       ...defaults,

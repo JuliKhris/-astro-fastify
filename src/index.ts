@@ -25,7 +25,7 @@ const viteFastifySSRPlugin = (options: Options) => {
     name: viteRoutesPackageName,
     async configureServer(server: any) {
       const nextSymbol = Symbol("next");
-      const { devRoutesApi, useLogger } = options;
+      const { devRoutesApi, useLogger, fastifyServerOptions } = options;
 
       const serverFactory: FastifyServerFactory = (
         handler: any,
@@ -41,6 +41,7 @@ const viteFastifySSRPlugin = (options: Options) => {
       const fastify = Fastify({
         logger: useLogger ?? true,
         serverFactory,
+        ...fastifyServerOptions 
       });
 
       if (devRoutesApi) {

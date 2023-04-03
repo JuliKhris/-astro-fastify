@@ -1,5 +1,6 @@
 
 import { SSRManifest } from "astro/app/types.js";
+import { FastifyServerOptions } from "fastify";
 import { FastifyInstance } from "fastify/types/instance";
 import { FastifyPluginAsync } from "fastify/types/plugin";
 import { Url } from "url";
@@ -35,6 +36,7 @@ export interface Options {
     serverEntryPoint?: string
     fastifyPlugins?:FastifyPlugins
     authPluginProvider?: AuthPluginProvider | AuthPluginProviderFromConfig     
+    fastifyServerOptions?:FastifyServerOptions
 }
 
 export type AvailableFastifyRoutes = (fastify: FastifyInstance) => void;
