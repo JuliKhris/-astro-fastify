@@ -138,8 +138,19 @@ const processResponse = async(reply:FastifyReply, request: { raw: IncomingMessag
                   // @ts-ignore
                   preHandler: fastify[`${decorator}`],
                   handler: async (request, reply) => {
-                    request.log.info(`${route} generated`);
-                    return await processResponse(reply,request,_routeData)                                  
+                     return await processResponse(reply,request,_routeData)                                  
+                  },
+                });
+              }
+              else{
+                const { route } = _routeData;
+                //@ts-ignore
+                fastify.route({
+                  method: "GET",
+                  url: route,
+                  // @ts-ignore
+                    handler: async (request, reply) => {
+                      return await processResponse(reply,request,_routeData)                                  
                   },
                 });
               }
@@ -155,15 +166,21 @@ const processResponse = async(reply:FastifyReply, request: { raw: IncomingMessag
       }
     }
   }
-
-  fastify.get("/*", async function (request, reply) {
-    const routeData = app.match(request.raw, { matchNotFound: true });
-    if (routeData) {
-      return await processResponse(reply,request,routeData)       
-    } else {
-      reply.status(404).type("text/plain").send("Not found");
-    }
-  });
+  else{
+    manifest.routes.forEach((element: RouteInfo) => {
+      const _routeData = element.routeData;
+      const obj = getRouteAuthorityInfo(_routeData);
+      const { route } = _routeData;
+    fastify.route({
+      method: "GET",
+      url: route,
+      // @ts-ignore
+      handler: async (request, reply) => {
+      return await processResponse(reply,request,_routeData)                                  
+      },
+    });
+  })
+}
 
   const envPort = Number(process.env.PORT ?? port);
   const hostToUse = process.env.HOST ?? (host ?? "127.0.0.1").toString();
