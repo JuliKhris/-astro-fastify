@@ -8,7 +8,7 @@ const { packageName, serverFile, viteRoutesPackageName, packageBase } = config;
 
 import initDefaultOptions from "./defaults.js";
 import Fastify, { FastifyServerFactory } from "fastify";
-import { Server } from "http";
+import { Server, createServer } from "http";
 
 const getAdapter = (args?: Options): AstroAdapter => {
   const serverEntryPoint = `${packageName}/${serverFile}`;
@@ -29,13 +29,17 @@ const viteFastifySSRPlugin = (options: Options) => {
 
       const serverFactory: FastifyServerFactory = (
         handler: any,
-        opts: any
+        _opts: any
       ): Server => {
+        // Bridge Fastify → Vite: stash Vite's "next" and let Fastify handle the request
         server.middlewares.use((req: any, res: any, next: any) => {
           req[nextSymbol] = next;
           handler(req, res);
         });
-        return server.httpServer;
+        // Return a real Node server so Fastify sees a valid instance
+        return createServer((req: any, res: any) => {
+          handler(req, res);
+        });
       };
 
       const fastify = Fastify({
@@ -57,7 +61,7 @@ const viteFastifySSRPlugin = (options: Options) => {
       fastify.all("/*", function (request: any) {
         /** @type {import('connect').NextFunction} */
         const next = request.raw[nextSymbol];
-        next();
+        next && next();
       });
 
       await fastify.ready();
@@ -137,7 +141,7 @@ const adapter = (args: Options): AstroIntegration => {
   return {
     name: packageName,
     hooks: {
-      "astro:config:setup"({ updateConfig }) {
+  "astro:config:setup"({ updateConfig }: { updateConfig: (config: any) => void }) {
         const config = {
           vite: {
             plugins: [viteFastifySSRPlugin(defaultArgs)],
@@ -145,7 +149,7 @@ const adapter = (args: Options): AstroIntegration => {
         };
         updateConfig(config);
       },
-      "astro:build:setup"({ vite, target }) {
+  "astro:build:setup"({ vite, target }: { vite: any; target: string }) {
         if (target === "client") {
           const rollupOptions = vite?.build?.rollupOptions;
           if (rollupOptions) {
@@ -167,13 +171,13 @@ const adapter = (args: Options): AstroIntegration => {
           }
         }
       },
-      "astro:build:start": (): void | Promise<void> => {
+  "astro:build:start": (): void | Promise<void> => {
         defaultArgs.clientRelative = relative(
           fileURLToPath(_server),
           fileURLToPath(_client)
         );
       },
-      "astro:config:done": ({ setAdapter, config }) => {
+  "astro:config:done": ({ setAdapter, config }: { setAdapter: (adapter: any) => void; config: any }) => {
         _client = config.build.client;
         _server = config.build.server;
         setAdapter(getAdapter(defaultArgs));
