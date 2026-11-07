@@ -1,6 +1,6 @@
 {
  "name": "@julikhris/astro-fastify",
- "version": "0.6.0",
+ "version": "1.0.0",
  "main": "dist/index.js",
  "typings": "dist/index.d.ts",
  "author": "Donald Osgood",
