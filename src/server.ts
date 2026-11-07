@@ -7,16 +7,15 @@ import {
   FastifyPluginHooks,
   IncomingMessage,
   Options,
-  Properties,
-  ServerResponse,
-  SSRManifest,
+  Properties
 } from "./types.js";
 import initDefaultOptions from "./defaults.js";
 import { setFastifyStaticRoutes } from "./utils.js";
-import { RouteInfo } from "astro/app/types.js";
+import type { SSRManifest } from "astro";
+export type { SSRManifest } from "astro";
 import { RouteData } from "astro";
 import { FastifyReply } from "fastify/types/reply.js";
-import Stream, { Readable } from 'node:stream';
+import  { Readable } from 'node:stream';
 
 polyfill(globalThis, {
   exclude: "window document",
@@ -126,8 +125,8 @@ const processResponse = async(reply:FastifyReply, request: { raw: IncomingMessag
         if (validate) {
           fastify.register(authPlugin,{[functionName]:validate}).after(()=>{
           if (useRoutesFromManifest) {
-            manifest.routes.forEach((element: RouteInfo) => {
-              const _routeData = element.routeData;
+           (manifest.routes as unknown as RouteData[]).forEach((element) => {
+              const _routeData = element;
               const obj = getRouteAuthorityInfo(_routeData);
               if (obj?.authenticate) {
                 const { route } = _routeData;
@@ -167,8 +166,8 @@ const processResponse = async(reply:FastifyReply, request: { raw: IncomingMessag
     }
   }
   else{
-    manifest.routes.forEach((element: RouteInfo) => {
-      const _routeData = element.routeData;
+    (manifest.routes as unknown as RouteData[]).forEach((element) => {
+     const _routeData = element;
       const obj = getRouteAuthorityInfo(_routeData);
       const { route } = _routeData;
     fastify.route({

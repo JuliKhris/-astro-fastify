@@ -4,23 +4,46 @@ import { fileURLToPath, URL } from "url";
 import { AuthPluginProviderFromConfig, Options } from "./types";
 import { AstroAdapter, AstroIntegration } from "astro";
 import config from "./config.js";
-const { packageName, serverFile, viteRoutesPackageName, packageBase } = config;
-
 import initDefaultOptions from "./defaults.js";
 import Fastify, { FastifyServerFactory } from "fastify";
 import { Server, createServer } from "http";
 
-const getAdapter = (args?: Options): AstroAdapter => {
+const { packageName, serverFile, viteRoutesPackageName, packageBase } = config;
+
+/**
+ * Creates an Astro adapter configuration object for Fastify integration
+ * 
+ * Astro 4.0+ requires adapters to declare supported features via `supportedAstroFeatures`
+ * This adapter is configured for server-side rendering only (SSR)
+ * 
+ * @param args - Optional adapter configuration options
+ * @returns AstroAdapter configuration with Astro 4 feature map
+ */
+const createAdapterConfig = (args?: Options): AstroAdapter => {
   const serverEntryPoint = `${packageName}/${serverFile}`;
   return {
     name: packageName,
     serverEntrypoint: serverEntryPoint,
     exports: ["createExports"],
     args: args,
+    // Astro 4.0+ requires explicit feature map for adapter compatibility
+    supportedAstroFeatures: {
+     staticOutput: 'unsupported',           // No static export support
+      hybridOutput: 'unsupported',     // No hybrid rendering
+     serverOutput: 'stable'      // Always SSR
+      //sharpImageService: false,        // Uses default image optimization
+    },
   };
 };
 
-const viteFastifySSRPlugin = (options: Options) => {
+/**
+ * Vite plugin that configures Fastify SSR during dev mode
+ * Integrates Fastify server with Vite's dev middleware
+ * 
+ * @param options - Adapter configuration options
+ * @returns Vite plugin configuration
+ */
+const createViteFastifySSRPlugin = (options: Options) => {
   return {
     name: viteRoutesPackageName,
     async configureServer(server: any) {
@@ -72,31 +95,27 @@ const viteFastifySSRPlugin = (options: Options) => {
           options;
         let outCode: string = code;
         if (authPluginProvider) {
-          const _configPathFromFile = getProviderConfigFromFile(
+          const configPath = getProviderConfigFromFile(
             authPluginProvider as AuthPluginProviderFromConfig
           )
           
-          if (_configPathFromFile) {
-            outCode = `import _authPluginConfig from "${_configPathFromFile}"; \n ${outCode}`
-            await import(_configPathFromFile).then(async item=>{
-              const _authPluginConfig = item.default
-              const {pluginPath,authActions,validateFunctionName, actionsName} = _authPluginConfig; 
-              if(pluginPath){
-                const plugIn = await import(pluginPath.pathname).then( 
-                  async (item)=> { 
-                  if(pluginPath.pathname){
-                      outCode = `import _authPlugin from "${pluginPath.pathname}";\n  ${outCode}`;
-                  }
-                  if(authActions.pathname){
-                      outCode = `import _authActions from "${authActions.pathname}";\n ${outCode}`;  
-                  }                                                                
-                })
+          if (configPath) {
+            outCode = `import _authPluginConfig from "${configPath}"; \n ${outCode}`
+            try {
+              const authConfig = await import(configPath)
+              const { pluginPath, authActions } = authConfig.default
+              
+              if (pluginPath?.pathname) {
+                outCode = `import _authPlugin from "${pluginPath.pathname}";\n  ${outCode}`;
               }
-          }); 
-          }
-          else{
-            //try authplugin provider object
-            console.log("AuthPluginProvider type not implemented yet. Please use AuthPluginProviderFromConfig")
+              if (authActions?.pathname) {
+                outCode = `import _authActions from "${authActions.pathname}";\n ${outCode}`;  
+              }
+            } catch (error) {
+              console.error(`[astro-fastify] Failed to load auth config from ${configPath}:`, error)
+            }
+          } else {
+            console.warn("[astro-fastify] AuthPluginProvider type not implemented. Use AuthPluginProviderFromConfig")
           }
         }
 
@@ -132,9 +151,16 @@ const getProviderConfigFromFile = (
   }
 };
 
-const adapter = (args: Options): AstroIntegration => {
-  // initilize options
-  let defaultArgs = initDefaultOptions(args);
+/**
+ * Main Astro integration for Fastify SSR adapter
+ * Configures Fastify server, sets up routes, and manages build output
+ * 
+ * @param args - Adapter configuration options
+ * @returns Astro integration hook configuration
+ */
+const createFastifyIntegration = (args: Options): AstroIntegration => {
+  // Initialize adapter options with defaults
+  const defaultArgs = initDefaultOptions(args);
   let _client: globalThis.URL;
   let _server: globalThis.URL;
 
@@ -144,7 +170,7 @@ const adapter = (args: Options): AstroIntegration => {
   "astro:config:setup"({ updateConfig }: { updateConfig: (config: any) => void }) {
         const config = {
           vite: {
-            plugins: [viteFastifySSRPlugin(defaultArgs)],
+            plugins: [createViteFastifySSRPlugin(defaultArgs)],
           },
         };
         updateConfig(config);
@@ -180,7 +206,7 @@ const adapter = (args: Options): AstroIntegration => {
   "astro:config:done": ({ setAdapter, config }: { setAdapter: (adapter: any) => void; config: any }) => {
         _client = config.build.client;
         _server = config.build.server;
-        setAdapter(getAdapter(defaultArgs));
+        setAdapter(createAdapterConfig(defaultArgs));
         if (config.output === "static") {
           console.warn(
             `[${packageName}] \`output: "server"\` is required to use this adapter.`
@@ -191,4 +217,4 @@ const adapter = (args: Options): AstroIntegration => {
   };
 };
 
-export default adapter;
+export default createFastifyIntegration;

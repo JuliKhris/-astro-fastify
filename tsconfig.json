@@ -3,18 +3,20 @@
     "src",
     "types"
   ],
-   "compilerOptions": {
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "resolveJsonModule": true,
     "allowJs": true,
     "module": "ESNext",   
     "target": "ES2020",
+    "rootDir": "./src",
     "outDir": "./dist",
     "strict": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "declaration": true,
-    "baseUrl": "./",  
     "esModuleInterop": true,      
-    "skipLibCheck": true, 
-    "forceConsistentCasingInFileNames": true 
+    "noEmitOnError": false, 
+    "forceConsistentCasingInFileNames": true
   }
 }
