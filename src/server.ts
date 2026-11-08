@@ -125,8 +125,8 @@ const processResponse = async(reply:FastifyReply, request: { raw: IncomingMessag
         if (validate) {
           fastify.register(authPlugin,{[functionName]:validate}).after(()=>{
           if (useRoutesFromManifest) {
-           (manifest.routes as unknown as RouteData[]).forEach((element) => {
-              const _routeData = element;
+           manifest.routes.forEach((element) => {
+              const _routeData = element.routeData;
               const obj = getRouteAuthorityInfo(_routeData);
               if (obj?.authenticate) {
                 const { route } = _routeData;
@@ -166,8 +166,8 @@ const processResponse = async(reply:FastifyReply, request: { raw: IncomingMessag
     }
   }
   else{
-    (manifest.routes as unknown as RouteData[]).forEach((element) => {
-     const _routeData = element;
+    manifest.routes.forEach((element) => {
+     const _routeData = element.routeData;
       const obj = getRouteAuthorityInfo(_routeData);
       const { route } = _routeData;
     fastify.route({
